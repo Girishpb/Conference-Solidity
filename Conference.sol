@@ -26,3 +26,23 @@ contract Conference {  // can be killed, so the owner gets sent the money in the
 		if (msg.sender != organizer) { return; }
 		quota = newquota;
 	}
+	function refundTicket(address recipient, uint amount) public {
+		if (msg.sender != organizer) { return; }
+		if (registrantsPaid[recipient] == amount) { 
+			address myAddress = this;
+			if (myAddress.balance >= amount) { 
+				recipient.send(amount);
+				Refund(recipient, amount);
+				registrantsPaid[recipient] = 0;
+				numRegistrants--;
+			}
+		}
+		return;
+	}
+
+	function destroy() {
+		if (msg.sender == organizer) { // without this funds could be locked in the contract forever!
+			suicide(organizer);
+		}
+	}
+}
